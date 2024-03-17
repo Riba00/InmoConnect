@@ -10,8 +10,10 @@ const loginForm = (req, res) => {
 };
 
 const registerForm = (req, res) => {
+
   res.render("auth/register", {
     page: "Register",
+    csrfToken: req.csrfToken()
   });
 };
 
@@ -31,6 +33,7 @@ const register = async (req, res) => {
   if (!result.isEmpty()) {
     return res.render("auth/register", {
       page: "Register",
+      csrfToken: req.csrfToken(),
       errors: result.array(),
       user: {
         name: req.body.name,
@@ -46,6 +49,7 @@ const register = async (req, res) => {
   if (userExists) {
     return res.render("auth/register", {
       page: "Register",
+      csrfToken: req.csrfToken(),
       errors: [{ msg: "Email is already in use" }],
       user: {
         name: req.body.name,
