@@ -1,7 +1,8 @@
 import { check, validationResult } from "express-validator";
+import bcrypt from 'bcrypt'
 import User from "../models/User.js";
 import { generateId } from "../helpers/tokens.js";
-import { registerEmail } from "../helpers/emails.js";
+import { registerEmail, forgotPassword } from "../helpers/emails.js";
 
 const loginForm = (req, res) => {
   res.render("auth/login", {
@@ -10,10 +11,9 @@ const loginForm = (req, res) => {
 };
 
 const registerForm = (req, res) => {
-
   res.render("auth/register", {
     page: "Register",
-    csrfToken: req.csrfToken()
+    csrfToken: req.csrfToken(),
   });
 };
 
@@ -57,7 +57,7 @@ const register = async (req, res) => {
       },
     });
   }
-  
+
   const user = await User.create({
     name,
     email,
@@ -66,11 +66,11 @@ const register = async (req, res) => {
   });
 
   // Send email confirmation
-  // registerEmail({
-  //   name: user.name,
-  //   email: user.email,
-  //   token: user.token,
-  // });
+  registerEmail({
+    name: user.name,
+    email: user.email,
+    token: user.token,
+  });
 
   res.render("templates/message", {
     page: "You have been registered",
@@ -99,14 +99,127 @@ const confirmEmail = async (req, res) => {
 
   return res.render("auth/confirmation-account", {
     page: "Account confirmed",
-    message: "Your account has been confirmed successfully! You can now log in.",
+    message:
+      "Your account has been confirmed successfully! You can now log in.",
   });
 };
 
 const resetPassowrdForm = (req, res) => {
   res.render("auth/reset-password", {
     page: "Reset your password",
+    csrfToken: req.csrfToken(),
   });
 };
 
-export { loginForm, registerForm, register, confirmEmail, resetPassowrdForm };
+const resetPassword = async (req, res) => {
+  // Validation
+  await check("email").isEmail().withMessage("Email is not correct").run(req);
+
+  let result = validationResult(req);
+
+  // Validate result is empty (no errors)
+  if (!result.isEmpty()) {
+    return res.render("auth/reset-password", {
+      page: "Reset your password",
+      csrfToken: req.csrfToken(),
+      errors: result.array(),
+    });
+  }
+
+  // Search
+  const { email } = req.body;
+
+  const user = await User.findOne({ where: { email } });
+
+  console.log(user);
+
+  if (!user) {
+    return res.render("auth/reset-password", {
+      page: "Reset your password",
+      csrfToken: req.csrfToken(),
+      errors: [{ msg: "Email not found" }],
+    });
+  }
+
+  user.token = generateId();
+  await user.save();
+
+  forgotPassword({
+    name: user.name,
+    email: user.email,
+    token: user.token,
+  });
+
+  res.render("templates/message", {
+    page: "Reset your password",
+    message:
+      "We have sent you an email to reset your password. Please check your inbox.",
+  });
+};
+
+const checkToken = async (req, res, next) => {
+  const { token } = req.params;
+
+  const user = await User.findOne({ where: { token } });
+
+  if (!user) {
+    return res.render("templates/message", {
+      page: "Reset your password",
+      message: "An error occurred. Please try again",
+      error: true,
+    });
+  }
+
+  res.render("auth/new-password", {
+    page: "Reset your password",
+    csrfToken: req.csrfToken(),
+  });
+};
+
+const newPassword = async (req, res) => {
+  await check("password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long")
+    .run(req);
+
+  let result = validationResult(req);
+
+  // Validate result is empty (no errors)
+  if (!result.isEmpty()) {
+    return res.render("auth/new-password", {
+      page: "Reset your password",
+      csrfToken: req.csrfToken(),
+      errors: result.array(),
+    });
+  }
+
+  const { token } = req.params;
+  const { password } = req.body;
+
+  const user = User.findOne({where:{token}})
+
+  const salt = await bcrypt.genSalt(10)
+  user.password = await bcrypt.hash(password, salt)
+  user.token = null
+
+  await user.save()
+
+  res.render('/auth/confirmation-account', {
+    page: "Password updated",
+    message: "Your password has been updated successfully! You can now log in.",
+  })
+
+
+
+};
+
+export {
+  loginForm,
+  registerForm,
+  register,
+  confirmEmail,
+  resetPassowrdForm,
+  resetPassword,
+  checkToken,
+  newPassword,
+};
