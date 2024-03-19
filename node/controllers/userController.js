@@ -1,13 +1,72 @@
 import { check, validationResult } from "express-validator";
-import bcrypt from 'bcrypt'
+import bcrypt from "bcrypt";
+
 import User from "../models/User.js";
-import { generateId } from "../helpers/tokens.js";
+import { generateJWT, generateId } from "../helpers/tokens.js";
 import { registerEmail, forgotPassword } from "../helpers/emails.js";
 
 const loginForm = (req, res) => {
   res.render("auth/login", {
     page: "Log In",
+    csrfToken: req.csrfToken(),
   });
+};
+
+const login = async (req, res) => {
+  await check("email").isEmail().withMessage("Email is required").run(req);
+  await check("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .run(req);
+
+  let result = validationResult(req);
+
+  // Validate result is empty (no errors)
+  if (!result.isEmpty()) {
+    return res.render("auth/login", {
+      page: "Log In",
+      csrfToken: req.csrfToken(),
+      errors: result.array(),
+    });
+  }
+
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ where: { email } });
+
+  if (!user) {
+    return res.render("auth/login", {
+      page: "Log In",
+      csrfToken: req.csrfToken(),
+      errors: [{msg:'Incorrect credentials'}]
+    });
+  }
+
+  if (!user.is_confirmed){
+    return res.render("auth/login", {
+      page: "Log In",
+      csrfToken: req.csrfToken(),
+      errors: [{msg:'Please confirm your email to log in'}]
+    });
+  }
+
+  if(!user.checkPassword(password)){
+    return res.render("auth/login", {
+      page: "Log In",
+      csrfToken: req.csrfToken(),
+      errors: [{msg:'Incorrect credentials'}]
+    });
+  }
+
+  const token = generateJWT({id: user.id, name: user.name})
+
+  console.log(token);
+
+  return res.cookie('_token', token, {
+    httpOnly: true,
+    // secure:true
+  }).redirect('my-properties')
+
 };
 
 const registerForm = (req, res) => {
@@ -196,25 +255,23 @@ const newPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
-  const user = User.findOne({where:{token}})
+  const user = User.findOne({ where: { token } });
 
-  const salt = await bcrypt.genSalt(10)
-  user.password = await bcrypt.hash(password, salt)
-  user.token = null
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(password, salt);
+  user.token = null;
 
-  await user.save()
+  await user.save();
 
-  res.render('/auth/confirmation-account', {
+  res.render("/auth/confirmation-account", {
     page: "Password updated",
     message: "Your password has been updated successfully! You can now log in.",
-  })
-
-
-
+  });
 };
 
 export {
   loginForm,
+  login,
   registerForm,
   register,
   confirmEmail,

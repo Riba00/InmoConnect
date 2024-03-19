@@ -1,9 +1,11 @@
 import express from 'express'
-import { loginForm, registerForm, register, confirmEmail, resetPassowrdForm, resetPassword, checkToken, newPassword } from '../controllers/userController.js'
+import { loginForm, login, registerForm, register, confirmEmail, resetPassowrdForm, resetPassword, checkToken, newPassword } from '../controllers/userController.js'
 
 const router = express.Router()
 
 router.get('/login', loginForm)
+router.post('/login', login)
+
 
 router.get('/register', registerForm)
 router.post('/register', register)
