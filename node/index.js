@@ -2,6 +2,7 @@ import express from 'express'
 import csrf from 'csurf'
 import cookieParser from 'cookie-parser'
 import userRouter from './routes/userRoutes.js'
+import propertiesRoutes from './routes/propertiesRoutes.js'
 import db from './config/db.js'
 
 
@@ -35,6 +36,7 @@ app.use( express.static('public'))
 
 // Routing
 app.use('/auth', userRouter)
+app.use('/', propertiesRoutes)
 
 
 
