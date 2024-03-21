@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 import db from '../config/db.js'
 import bcrypt from 'bcrypt'
+
 const User = db.define('users', {
     name: {
         type: DataTypes.STRING,
@@ -24,5 +25,9 @@ const User = db.define('users', {
         }
     }
 })
+
+User.prototype.checkPassword = function(password) {
+    return bcrypt.compareSync(password, this.password)
+}
 
 export default User

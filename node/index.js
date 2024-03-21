@@ -1,5 +1,8 @@
 import express from 'express'
+import csrf from 'csurf'
+import cookieParser from 'cookie-parser'
 import userRouter from './routes/userRoutes.js'
+import propertiesRoutes from './routes/propertiesRoutes.js'
 import db from './config/db.js'
 
 
@@ -8,6 +11,12 @@ const app = express()
 
 // Enable data reading on forms
 app.use( express.urlencoded({extended: true}))
+
+// Enable Cookie Parser
+app.use( cookieParser() )
+
+// Enable CSRF
+app.use( csrf({ cookie: true }) )
 
 // DB Connection
 try {
@@ -27,6 +36,7 @@ app.use( express.static('public'))
 
 // Routing
 app.use('/auth', userRouter)
+app.use('/', propertiesRoutes)
 
 
 
