@@ -60,8 +60,6 @@ const login = async (req, res) => {
 
   const token = generateJWT({id: user.id, name: user.name})
 
-  console.log(token);
-
   return res.cookie('_token', token, {
     httpOnly: true,
     // secure:true
@@ -190,8 +188,6 @@ const resetPassword = async (req, res) => {
   const { email } = req.body;
 
   const user = await User.findOne({ where: { email } });
-
-  console.log(user);
 
   if (!user) {
     return res.render("auth/reset-password", {
