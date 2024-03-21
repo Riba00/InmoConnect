@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: 'mysql'
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=inmoConnect
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=rootpwd
+    volumes:
+      - 'mysql_data:/var/lib/mysql'
+    ports:
+      - "3306:3306"
+    networks:
+      - inmoConnect-network
+
+  node:
+    build:
+      context: ./node
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./node:/app"
+      - "/app/node_modules"
+    depends_on:
+      - mysql
+    networks:
+      - inmoConnect-network
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - inmoConnect-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  inmoConnect-network:
+    driver: bridge

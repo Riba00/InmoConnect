@@ -114,13 +114,14 @@ const register = async (req, res) => {
         name: req.body.name,
         email: req.body.email,
       },
+      l,
     });
   }
 
   const user = await User.create({
-    name,
-    email,
-    password,
+    name: name,
+    email: email,
+    password: password,
     token: generateId(),
   });
 
