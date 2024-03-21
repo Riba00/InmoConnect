@@ -51,22 +51,23 @@ const register = async (req, res) => {
         name: req.body.name,
         email: req.body.email,
       },
+      l,
     });
   }
-  
+
   const user = await User.create({
-    name,
-    email,
-    password,
+    name: name,
+    email: email,
+    password: password,
     token: generateId(),
   });
 
   // Send email confirmation
-  // registerEmail({
-  //   name: user.name,
-  //   email: user.email,
-  //   token: user.token,
-  // });
+  registerEmail({
+    name: user.name,
+    email: user.email,
+    token: user.token,
+  });
 
   res.render("templates/message", {
     page: "You have been registered",
@@ -95,7 +96,8 @@ const confirmEmail = async (req, res) => {
 
   return res.render("auth/confirmation-account", {
     page: "Account confirmed",
-    message: "Your account has been confirmed successfully! You can now log in.",
+    message:
+      "Your account has been confirmed successfully! You can now log in.",
   });
 };
 
