@@ -1,47 +1,51 @@
-import express from 'express'
-import csrf from 'csurf'
-import cookieParser from 'cookie-parser'
-import userRouter from './routes/userRoutes.js'
-import propertiesRoutes from './routes/propertiesRoutes.js'
-import db from './config/db.js'
-
+import express from "express";
+import csrf from "csurf";
+import cookieParser from "cookie-parser";
+import userRouter from "./routes/userRoutes.js";
+import propertiesRoutes from "./routes/propertiesRoutes.js";
+import db from "./config/db.js";
 
 // Create app
-const app = express()
+const app = express();
 
 // Enable data reading on forms
-app.use( express.urlencoded({extended: true}))
+app.use(express.urlencoded({ extended: true }));
 
 // Enable Cookie Parser
-app.use( cookieParser() )
+app.use(cookieParser());
 
 // Enable CSRF
-app.use( csrf({ cookie: true }) )
+app.use(csrf({ cookie: true }));
 
 // DB Connection
-try {
+for (let attempt = 1; attempt <= 10; attempt++) {
+  try {
     await db.authenticate();
-    db.sync()
-    console.log('Connection correct')
-} catch (error) {
-    console.log(error);
+    await db.sync();
+    console.log("Connection correct");
+    break;
+  } catch (error) {
+    console.log(`Connection attempt ${attempt} failed.`, error);
+    if (attempt < retries) {
+      console.log(`Waiting ${delay / 1000} seconds before retrying...`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
 }
 
 // Habilite Pug
-app.set('view engine', 'pug')
-app.set('views', './views')
+app.set("view engine", "pug");
+app.set("views", "./views");
 
 // Public Folder
-app.use( express.static('public'))
+app.use(express.static("public"));
 
 // Routing
-app.use('/auth', userRouter)
-app.use('/', propertiesRoutes)
-
-
+app.use("/auth", userRouter);
+app.use("/", propertiesRoutes);
 
 // Define port and run project
-const port = process.env.APP_PORT || 3000
-app.listen(port, ()=> {
-    console.log(`Server running on ${port}`);
-})
+const port = process.env.APP_PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server running on ${port}`);
+});
