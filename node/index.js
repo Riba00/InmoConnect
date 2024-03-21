@@ -18,7 +18,8 @@ app.use(cookieParser());
 app.use(csrf({ cookie: true }));
 
 // DB Connection
-for (let attempt = 1; attempt <= 10; attempt++) {
+const retries = 10;
+for (let attempt = 1; attempt <= retries; attempt++) {
   try {
     await db.authenticate();
     await db.sync();
