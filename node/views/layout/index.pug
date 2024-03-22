@@ -5,6 +5,8 @@ html(lang="en")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         title InmoConnect | #{page}
         link(rel="stylesheet", href="/css/app.css", attr)
+        block styles
+        
     body.min-h-screen.bg-gray-50
         if bar
             include header
