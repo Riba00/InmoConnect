@@ -1,9 +1,8 @@
 import { exit } from 'node:process'
 import categories from "./categories.js";
 import prices from "./prices.js";
-import Category from '../models/Category.js'
-import Price from '../models/Price.js'
 import db from '../config/db.js'
+import { Category, Price } from '../models/index.js'
 
 const importData = async () => {
     try {
@@ -38,7 +37,7 @@ const cleanData = async () => {
         // ])
 
         await db.sync({force:true})
-        console.log("Seed Correct");
+        console.log("Clean Correct");
         exit()
 
     } catch (error) {
