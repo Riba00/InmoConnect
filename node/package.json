@@ -10,7 +10,9 @@
     "start": "node ./index.js",
     "server": "nodemon index.js",
     "js": "webpack --watch",
-    "dev": "concurrently \"npm run css\" \"npm run js\""
+    "dev": "concurrently \"npm run css\" \"npm run js\"",
+    "db:import" : "node ./seed/seeder.js -i",
+    "db:clean" : "node ./seed/seeder.js -c"
   },
   "keywords": [
     "MVC",
