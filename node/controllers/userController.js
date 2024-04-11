@@ -252,7 +252,7 @@ const newPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
-  const user = User.findOne({ where: { token } });
+  const user = await User.findOne({ where: { token } });
 
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(password, salt);
@@ -260,7 +260,7 @@ const newPassword = async (req, res) => {
 
   await user.save();
 
-  res.render("/auth/confirmation-account", {
+  res.render("auth/confirmation-account", {
     page: "Password updated",
     message: "Your password has been updated successfully! You can now log in.",
   });
