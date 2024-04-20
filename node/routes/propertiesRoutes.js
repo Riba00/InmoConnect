@@ -1,7 +1,8 @@
 import express from "express"
 import { body } from 'express-validator'
-import { admin, create, store } from '../controllers/propertyController.js'
+import { addImage, admin, create, store, storeImage } from '../controllers/propertyController.js'
 import protectRoute from "../middleware/protectRoute.js"
+import upload from "../middleware/uploadImage.js"
 
 const router = express.Router()
 
@@ -21,6 +22,14 @@ router.post('/properties/create', protectRoute,
     body('parkings').isNumeric().withMessage('Parking is required'),
     body('lat').notEmpty().withMessage('Property location is required'),
     store
+)
+
+router.get('/properties/add-image/:id', protectRoute, addImage)
+
+router.post('/properties/add-image/:id',
+    protectRoute,
+    upload.any(),
+    storeImage
 )
 
 export default router

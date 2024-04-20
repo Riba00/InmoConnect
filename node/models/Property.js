@@ -40,9 +40,9 @@ const Property = db.define('properties', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    image: {
-        type: DataTypes.STRING,
-        allowNull: false
+    images: {
+        type: DataTypes.TEXT,
+        allowNull: true
     },
     is_published: {
         type: DataTypes.BOOLEAN,

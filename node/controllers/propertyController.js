@@ -4,7 +4,6 @@ import { Category, Price, Property } from '../models/index.js'
 const admin = (req, res) => {
     res.render('properties/admin',{
         page: 'My Properties',
-        bar: true
     })
 }
 
@@ -18,7 +17,6 @@ const create = async (req, res) => {
 
     res.render('properties/create' ,{
         page: 'Create Property',
-        bar: true,
         csrfToken: req.csrfToken(),
         categories,
         prices,
@@ -39,7 +37,6 @@ const store = async (req, res) => {
     
         res.render('properties/create' ,{
             page: 'Create Property',
-            bar: true,
             csrfToken: req.csrfToken(),
             categories,
             prices,
@@ -48,7 +45,9 @@ const store = async (req, res) => {
         })
     }
 
-    const { title, description, category, price, rooms, wcs, parkings, lat, lng } = req.body
+    const { title, description, category, price, rooms, wcs, street, parkings, lat, lng, price: priceId, category: categoryId } = req.body
+
+    const { id: userId } = req.user
 
     try {
         const storedProperty = await Property.create({
@@ -57,21 +56,92 @@ const store = async (req, res) => {
             categoryId: category,
             priceId: price,
             rooms,
+            street,
             wcs,
             parkings,
             lat,
-            lng
+            lng,
+            priceId,
+            categoryId,
+            userId,
+            images: ''
         })
+
+        const { id } = storedProperty
+
+        return res.redirect(`/properties/add-image/${id}`)
     } catch (error) {
         console.log(error);
     }
+}
 
-    
+const addImage = async (req, res) => {
 
+    const { id } = req.params
+
+    const property = await Property.findByPk(id)
+
+    if (!property) {
+        return res.redirect('/my-properties')
+    }
+
+    if (property.is_published) {
+        return res.redirect('/my-properties')
+    }
+
+    if (property.userId.toString() !== req.user.id.toString()) {
+        return res.redirect('/my-properties')
+    }
+
+    res.render('properties/add-image', {
+        page: `Add Image: ${property.title}`,
+        csrfToken: req.csrfToken(),
+        property
+    })
+}
+
+const storeImage = async (req, res) => {
+
+    const { id } = req.params
+
+    const property = await Property.findByPk(id)
+
+    if (!property) {
+        return res.redirect('/my-properties')
+    }
+
+    if (property.is_published) {
+        return res.redirect('/my-properties')
+    }
+
+    if (property.userId.toString() !== req.user.id.toString()) {
+        return res.redirect('/my-properties')
+    }
+      
+
+    try {
+        const files = req.files.map(file => file.filename)
+
+        const images = JSON.stringify(files)
+
+        property.images = images
+        property.is_published = true
+
+        await property.save()
+
+        console.log(property);
+
+        
+
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 export {
     admin,
     create,
-    store
+    store,
+    addImage,
+    storeImage
 }
