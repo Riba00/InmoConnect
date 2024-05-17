@@ -23,8 +23,14 @@ Dropzone.options.images = {
         const publishBtn = document.querySelector('#publishButton')
 
         publishBtn.addEventListener('click', function() {
-            
             dropzone.processQueue()
+        })
+
+        dropzone.on('queuecomplete', function(){
+            if (dropzone.getActiveFiles().length == 0) {
+                console.log('redirect');
+                window.location.href = '/my-properties'
+            }
         })
     }
 }

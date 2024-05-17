@@ -100,7 +100,7 @@ const addImage = async (req, res) => {
     })
 }
 
-const storeImage = async (req, res) => {
+const storeImage = async (req, res, next) => {
 
     const { id } = req.params
 
@@ -128,10 +128,11 @@ const storeImage = async (req, res) => {
         property.is_published = true
 
         await property.save()
+        console.log('saved');
 
-        console.log(property);
+        // console.log(property);
 
-        
+        next()
 
     } catch (error) {
         console.log(error);
