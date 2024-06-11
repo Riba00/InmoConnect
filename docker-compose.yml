@@ -6,7 +6,7 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=rootpwd
       - MYSQL_DATABASE=inmoConnect
-      - MYSQL_USER=root
+      - MYSQL_USER=test
       - MYSQL_PASSWORD=rootpwd
     volumes:
       - 'mysql_data:/var/lib/mysql'

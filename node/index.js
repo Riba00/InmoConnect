@@ -19,6 +19,7 @@ app.use(csrf({ cookie: true }));
 
 // DB Connection
 const retries = 10;
+const delay = 10000;
 for (let attempt = 1; attempt <= retries; attempt++) {
   try {
     await db.authenticate();
