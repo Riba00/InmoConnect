@@ -3,35 +3,66 @@ import { validationResult } from "express-validator";
 import { Category, Price, Property } from "../models/index.js";
 
 const admin = async (req, res) => {
-  const { id } = req.user;
+  const { page: currentPage } = req.query;
 
-  const properties = await Property.findAll({
-    where: {
-      userId: id,
-    },
-    include: [
-      {
-        model: Category,
-        as: "category",
-      },
-      {
-        model: Price,
-        as: "price",
-      },
-    ],
-  });
+  const expresion = /^[1-9]$/;
 
-  properties.forEach((property) => {
-    if (typeof property.images === "string") {
-      property.images = JSON.parse(property.images);
-    }
-  });
+  if (!expresion.test(currentPage)) {
+    return res.redirect("/my-properties?page=1");
+  }
 
-  res.render("properties/admin", {
-    page: "My Properties",
-    csrfToken: req.csrfToken(),
-    properties,
-  });
+  try {
+    const { id } = req.user;
+
+    const limit = 10
+    const offset = ((currentPage * limit) - limit)
+
+
+    const [properties, total] = await Promise.all([
+      Property.findAll({
+        limit,
+        offset,
+        where: {
+          userId: id,
+        },
+        include: [
+          {
+            model: Category,
+            as: "category",
+          },
+          {
+            model: Price,
+            as: "price",
+          },
+        ],
+      }),
+      Property.count({
+        where: {
+          userId : id
+        }
+      })
+    ])
+
+
+    properties.forEach((property) => {
+      if (typeof property.images === "string") {
+        property.images = JSON.parse(property.images);
+      }
+    });
+
+    res.render("properties/admin", {
+      page: "My Properties",
+      csrfToken: req.csrfToken(),
+      properties,
+      pages: Math.ceil(total/limit),
+      currentPage: Number(currentPage),
+      total,
+      offset,
+      limit
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const create = async (req, res) => {
@@ -291,7 +322,6 @@ const deleteProperty = async (req, res) => {
 };
 
 const showProperty = async (req, res) => {
-
   const { id } = req.params;
 
   const property = await Property.findByPk(id, {
