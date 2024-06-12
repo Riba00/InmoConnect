@@ -290,6 +290,37 @@ const deleteProperty = async (req, res) => {
   res.redirect("/my-properties");
 };
 
+const showProperty = async (req, res) => {
+
+  const { id } = req.params;
+
+  const property = await Property.findByPk(id, {
+    include: [
+      {
+        model: Category,
+        as: "category",
+      },
+      {
+        model: Price,
+        as: "price",
+      },
+    ],
+  });
+
+  if (!property) {
+    return res.redirect("/404");
+  }
+
+  if (typeof property.images === "string") {
+    property.images = JSON.parse(property.images);
+  }
+
+  res.render("properties/show", {
+    property,
+    page: property.title,
+  });
+};
+
 export {
   admin,
   create,
@@ -299,4 +330,5 @@ export {
   edit,
   update,
   deleteProperty,
+  showProperty,
 };
