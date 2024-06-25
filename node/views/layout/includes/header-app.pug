@@ -3,6 +3,13 @@ header.bg-indigo-600.p-4
         h1.text-2xl.text-white.font-extrabold.text-center Inmo
             span.font-normal Connect
         nav(class="my-5 text-sm md:flex md:items-center md:gap-3 font-bold text-white hidden")
-            a(href="/") My Properties
-            a(class="" href="") My Profile
-            a(class="bg-indigo-800 py-2 px-10 rounded-lg" href="") Log Out
+            a(href="/auth/register") Sign up
+            a(class="" href="/auth/login") Log in
+
+div(class="bg-indigo-700 py-5 hidden lg:block")
+    div(class="container mx-auto flex justify-between")
+        a(href="/categories/1" class="text-sm font-bold uppercase text-white") Houses
+        a(href="/categories/2" class="text-sm font-bold uppercase text-white") Flats
+        a(href="/categories/3" class="text-sm font-bold uppercase text-white") Garages
+        a(href="/categories/4" class="text-sm font-bold uppercase text-white") Lands
+        a(href="/categories/5" class="text-sm font-bold uppercase text-white") Cottages
