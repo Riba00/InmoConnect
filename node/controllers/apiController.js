@@ -1,25 +1,26 @@
-import { Property, Price, Category } from "../models/index.js"
+import { Property, Price, Category } from "../models/index.js";
 
-const properties = async (req,res) => {
+const properties = async (req, res) => {
+  const properties = await Property.findAll({
+    include: [
+      {
+        model: Price,
+        as: "price",
+      },
+      {
+        model: Category,
+        as: "category",
+      },
+    ],
+  });
 
-    const properties = await Property.findAll({
-        include: [
-            {
-                model: Price,
-                as: 'price',
-            },
-            {
-                model: Category,
-                as: 'category',
-            }
-        ]
-    })
+  properties.forEach((property) => {
+    if (typeof property.images === "string") {
+      property.images = JSON.parse(property.images);
+    }
+  });
 
-    res.json(properties)
+  res.json(properties);
+};
 
-    
-}
-
-export {
-    properties
-}
+export { properties };
