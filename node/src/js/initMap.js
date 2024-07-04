@@ -5,16 +5,38 @@
 
   let markers = new L.FeatureGroup().addTo(map);
 
+  let properties = [];
+
+  // Filters
+  const filters = {
+    category: "",
+    price: "",
+  };
+
+  const categoriesSelect = document.querySelector("#categories");
+  const pricesSelect = document.querySelector("#prices");
+
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution:
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(map);
 
+  //
+  categoriesSelect.addEventListener("change", (e) => {
+    filters.category = +e.target.value;
+    filterProperties();
+  });
+
+  pricesSelect.addEventListener("change", (e) => {
+    filters.price = +e.target.value;
+    filterProperties();
+  });
+
   const getProperties = async () => {
     try {
       const url = "/api/properties";
       const response = await fetch(url);
-      const properties = await response.json();
+      properties = await response.json();
 
       showProperties(properties);
     } catch (error) {
@@ -23,6 +45,11 @@
   };
 
   const showProperties = (properties) => {
+
+    markers.clearLayers()
+
+
+
     properties.forEach((property) => {
       const marker = new L.marker([property?.lat, property?.lng], {
         autoPan: true,
@@ -36,6 +63,22 @@
 
       markers.addLayer(marker);
     });
+  };
+
+  const filterProperties = () => {
+    const result = properties.filter(filterCategory).filter(filterPrice);
+    console.log(result);
+    showProperties(result)
+  };
+
+  const filterCategory = (property) => {
+    return filters.category
+      ? property.categoryId === filters.category
+      : property;
+  };
+
+  const filterPrice = (property) => {
+    return filters.price ? property.priceId === filters.price : property;
   };
 
   getProperties();
