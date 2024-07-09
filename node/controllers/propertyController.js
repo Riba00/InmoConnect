@@ -1,6 +1,7 @@
 import { unlink } from "node:fs/promises";
 import { validationResult } from "express-validator";
-import { Category, Price, Property } from "../models/index.js";
+import { Category, Price, Property, Message } from "../models/index.js";
+import { isSeller } from "../helpers/index.js";
 
 const admin = async (req, res) => {
   const { page: currentPage } = req.query;
@@ -14,9 +15,8 @@ const admin = async (req, res) => {
   try {
     const { id } = req.user;
 
-    const limit = 10
-    const offset = ((currentPage * limit) - limit)
-
+    const limit = 10;
+    const offset = currentPage * limit - limit;
 
     const [properties, total] = await Promise.all([
       Property.findAll({
@@ -38,11 +38,10 @@ const admin = async (req, res) => {
       }),
       Property.count({
         where: {
-          userId : id
-        }
-      })
-    ])
-
+          userId: id,
+        },
+      }),
+    ]);
 
     properties.forEach((property) => {
       if (typeof property.images === "string") {
@@ -54,11 +53,11 @@ const admin = async (req, res) => {
       page: "My Properties",
       csrfToken: req.csrfToken(),
       properties,
-      pages: Math.ceil(total/limit),
+      pages: Math.ceil(total / limit),
       currentPage: Number(currentPage),
       total,
       offset,
-      limit
+      limit,
     });
   } catch (error) {
     console.log(error);
@@ -348,7 +347,66 @@ const showProperty = async (req, res) => {
   res.render("properties/show", {
     property,
     page: property.title,
-    csrfToken: req.csrfToken()
+    csrfToken: req.csrfToken(),
+    user: req.user,
+    isSeller: isSeller(req.user?.id, property.userId),
+  });
+};
+
+const sendMessage = async (req, res) => {
+  const { id } = req.params;
+
+  const property = await Property.findByPk(id, {
+    include: [
+      {
+        model: Category,
+        as: "category",
+      },
+      {
+        model: Price,
+        as: "price",
+      },
+    ],
+  });
+
+  if (!property) {
+    return res.redirect("/404");
+  }
+
+  if (typeof property.images === "string") {
+    property.images = JSON.parse(property.images);
+  }
+
+  let result = validationResult(req);
+
+  if (!result.isEmpty()) {
+    res.render("properties/show", {
+      property,
+      page: property.title,
+      csrfToken: req.csrfToken(),
+      user: req.user,
+      isSeller: isSeller(req.user?.id, property.userId),
+      errors: result.array()
+    });
+  }
+
+  const { message } = req.body
+  const { id: propertyId} = req.params
+  const { id: userId} = req.user
+
+  await Message.create({
+    message,
+    propertyId,
+    userId
+  })
+
+  res.render("properties/show", {
+    property,
+    page: property.title,
+    csrfToken: req.csrfToken(),
+    user: req.user,
+    isSeller: isSeller(req.user?.id, property.userId),
+    sent: true
   });
 };
 
@@ -362,5 +420,5 @@ export {
   update,
   deleteProperty,
   showProperty,
-  
+  sendMessage,
 };
