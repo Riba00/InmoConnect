@@ -1,5 +1,8 @@
 extends ../layout/admin
 
+block styles
+    meta(name="csrf-token" content= csrfToken)
+
 block content 
     .py-10
         h1.text-4xl.my-10.font-extrabold.text-center Inmo
@@ -25,10 +28,10 @@ block content
                                         svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6")
                                             path(fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.902 7.098a3.75 3.75 0 0 1 3.903-.884.75.75 0 1 0 .498-1.415A5.25 5.25 0 0 0 8.005 9.75H7.5a.75.75 0 0 0 0 1.5h.054a5.281 5.281 0 0 0 0 1.5H7.5a.75.75 0 0 0 0 1.5h.505a5.25 5.25 0 0 0 6.494 2.701.75.75 0 1 0-.498-1.415 3.75 3.75 0 0 1-4.252-1.286h3.001a.75.75 0 0 0 0-1.5H9.075a3.77 3.77 0 0 1 0-1.5h3.675a.75.75 0 0 0 0-1.5h-3c.105-.14.221-.274.348-.402Z" clip-rule="evenodd")
                                         = property.price.name
+                                    a(href=`/messages/${property.id}` class="text-sm text-gray-600")= `${property.messages.length} Messages`
 
-                                div(class="sm:w-1/4 md:w-2/6 lg:flex-1 flex flex-col lg:flex-row gap-2")
-                                    form(action="#")
-                                        input(type="submit" class=`w-full px-2 py-2 md:py-1 text-xs leading-5 font-semibold rounded cursor-pointer ${property.is_published ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}` value=`${property.is_published ? 'Published' : 'Not Published'}`)
+                                div(class="sm:w-1/4 md:w-2/6 lg:w-1/6 flex flex-col 2xl:flex-row gap-2")
+                                    button(type="button" data-property-id=`${property.id}` class=`change-status w-full px-2 py-2 md:py-1 text-xs leading-5 font-semibold rounded cursor-pointer ${property.is_published ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`)= `${property.is_published ? 'Published' : 'Not Published'}`
                                     
                                     a(href=`/properties/edit/${property.id}` class="text-center px-2 py-2 md:py-1 text-xs leading-5 font-semibold rounded cursor-pointer text-indigo-800 bg-indigo-100") Edit
                                     
@@ -55,3 +58,6 @@ block content
                                     a(href=`/my-properties?page=${n}` class=`${currentPage == n ? 'bg-indigo-50 boder-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'} relative inline-flex items-center px-4 py-2 border text-sm font-medium`) #{n++}  
         else 
             p.text-center No Properties
+
+block scripts 
+    script(src="/js/changeStatus.js") 

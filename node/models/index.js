@@ -17,6 +17,8 @@ Property.belongsTo(User, {
     foreignKey: 'userId'
 })
 
+Property.hasMany(Message, {foreignKey: 'propertyId'})
+
 Message.belongsTo(Property, {foreignKey: 'propertyId'})
 Message.belongsTo(User, {foreignKey: 'userId'})
 
