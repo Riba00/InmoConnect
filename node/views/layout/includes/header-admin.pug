@@ -2,7 +2,24 @@ header.bg-indigo-600.p-4
     .container.mx-auto.flex.justify-between.items-center
         h1.text-2xl.text-white.font-extrabold.text-center Inmo
             span.font-normal Connect
-        nav(class="my-5 text-sm md:flex md:items-center md:gap-3 font-bold text-white hidden")
+        // Botón de menú de hamburguesa
+        button#menu-button(class="block md:hidden text-white")
+            svg(xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor")
+                path(stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7")
+        // Menú de navegación
+        nav#menu(class="hidden my-5 text-sm md:flex md:items-center md:gap-3 font-bold text-white")
             a(href="/my-properties") My Properties
-            a(class="" href="") My Profile
-            a(class="bg-indigo-800 py-2 px-10 rounded-lg" href="") Log Out
+            //- a(class="" href="") My Profile
+            form(action="/auth/logout" method="POST")
+                input(type="hidden" name="_csrf" value=csrfToken)
+                input(type="submit" class="bg-indigo-800 py-2 px-10 rounded-lg hover:cursor-pointer" value="Log Out")
+
+script.
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuButton = document.getElementById('menu-button');
+        const menu = document.getElementById('menu');
+
+        menuButton.addEventListener('click', function() {
+            menu.classList.toggle('hidden');
+        });
+    });
