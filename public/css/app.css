@@ -586,6 +586,9 @@ video {
   width: 1.5rem;
   height: 1.5rem;
 }
+.h-6 {
+  height: 1.5rem;
+}
 .h-72 {
   height: 18rem;
 }
@@ -598,20 +601,17 @@ video {
 .h-auto {
   height: auto;
 }
-.h-6 {
-  height: 1.5rem;
-}
 .min-h-screen {
   min-height: 100vh;
 }
 .w-24 {
   width: 6rem;
 }
-.w-full {
-  width: 100%;
-}
 .w-6 {
   width: 1.5rem;
+}
+.w-full {
+  width: 100%;
 }
 .max-w-4xl {
   max-width: 56rem;
@@ -1122,24 +1122,16 @@ video {
     display: block;
   }
 
-  .lg\:w-4\/6 {
-    width: 66.666667%;
-  }
-
   .lg\:w-1\/6 {
     width: 16.666667%;
   }
 
-  .lg\:flex-1 {
-    flex: 1 1 0%;
+  .lg\:w-4\/6 {
+    width: 66.666667%;
   }
 
   .lg\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .lg\:flex-row {
-    flex-direction: row;
   }
 }
 
